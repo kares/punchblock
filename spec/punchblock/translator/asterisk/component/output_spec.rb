@@ -1345,6 +1345,53 @@ module Punchblock
                       expect(original_command.complete_event(0.1).reason).to be_a Punchblock::Component::Output::Complete::Finish
                     end
 
+                    context "when multiple fallback documents are specified" do
+                      let :fallback_doc1 do
+                        RubySpeech::SSML.draw do
+                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 1' }}
+                        end
+                      end
+
+                      let :fallback_doc2 do
+                        RubySpeech::SSML.draw do
+                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 2' }}
+                        end
+                      end
+
+                      let :fallback_doc do
+                        RubySpeech::SSML.draw do
+                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 1' }}
+                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 2' }}
+                        end
+                      end
+
+                      let :ssml_doc do
+                        my_fallback_doc = fallback_doc
+                        RubySpeech::SSML.draw do
+                          audio :src => audio_filename1 do
+                            string "Fallback 1"
+                          end
+                          audio :src => audio_filename2 do
+                            embed my_fallback_doc
+                          end
+                          audio :src => audio_filename3 do
+                            string "Fallback 3"
+                          end
+                        end
+                      end
+
+                      it "should render each document individually via MRCP and then send a complete event" do
+                        expect_answered
+                        expect_playback audio_filename1
+                        expect_playback audio_filename2
+                        expect_mrcpsynth fallback_doc1
+                        expect_mrcpsynth fallback_doc2
+                        expect_playback audio_filename3
+                        subject.execute
+                        original_command.complete_event(0.1).reason.should be_a Punchblock::Component::Output::Complete::Finish
+                      end
+                    end
+
                     context "and the SYNTHSTATUS variable is set to 'ERROR'" do
                       let(:synthstatus) { 'ERROR' }
 

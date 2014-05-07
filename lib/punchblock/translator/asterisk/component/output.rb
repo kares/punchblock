@@ -47,7 +47,7 @@ module Punchblock
                   doc.value.children.each do |node|
                     case node
                     when RubySpeech::SSML::Audio
-                      playback([path_for_audio_node(node)]) || render_with_unimrcp(fallback_doc(doc, node))
+                      playback([path_for_audio_node(node)]) || play_fallback(doc, node)
                     when String
                       if node.include?(' ')
                         render_with_unimrcp(copied_doc(doc, node))
@@ -164,9 +164,16 @@ module Punchblock
             @call.channel_var('PLAYBACKSTATUS') != 'FAILED'
           end
 
-          def fallback_doc(original, failed_audio_node)
-            children = failed_audio_node.nokogiri_children
-            copied_doc original, children
+          def play_fallback(original, failed_audio_node)
+            fallback_docs(original, failed_audio_node).each do |part|
+              render_with_unimrcp(part)
+            end
+          end
+
+          def fallback_docs(original, failed_audio_node)
+            failed_audio_node.nokogiri_children.map do |child|
+              copied_doc original, child
+            end
           end
 
           def copied_doc(original, elements)
