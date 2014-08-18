@@ -133,20 +133,22 @@ module Punchblock
             context 'with multiple inline documents' do
               let(:output_command_options) { { render_documents: [{value: ssml_doc}, {value: ssml_doc}] } }
 
-              it "should return an error and not execute any actions" do
+              it "should return a ref and execute SynthAndRecog" do
+                param = [[ssml_doc, ssml_doc].map{|d| d.to_doc.to_s.squish}.join('^'), voice_grammar.to_doc.to_s].map { |o| "\"#{o.to_s.squish.gsub('"', '\"')}\"" }.push('uer=1&b=1').join(',')
+                mock_call.should_receive(:execute_agi_command).once.with('EXEC SynthAndRecog', param).and_return code: 200, result: 1
                 subject.execute
-                error = ProtocolError.new.setup 'option error', 'Only one document is allowed.'
-                expect(original_command.response(0.1)).to eq(error)
+                original_command.response(0.1).should be_a Ref
               end
             end
 
             context 'with multiple documents by URI' do
               let(:output_command_options) { { render_documents: [{url: 'http://example.com/doc1.ssml'}, {url: 'http://example.com/doc2.ssml'}] } }
 
-              it "should return an error and not execute any actions" do
+              it "should return a ref and execute SynthAndRecog" do
+                param = ['http://example.com/doc1.ssml^http://example.com/doc2.ssml', voice_grammar.to_doc.to_s].map { |o| "\"#{o.to_s.squish.gsub('"', '\"')}\"" }.push('uer=1&b=1').join(',')
+                mock_call.should_receive(:execute_agi_command).once.with('EXEC SynthAndRecog', param).and_return code: 200, result: 1
                 subject.execute
-                error = ProtocolError.new.setup 'option error', 'Only one document is allowed.'
-                expect(original_command.response(0.1)).to eq(error)
+                original_command.response(0.1).should be_a Ref
               end
             end
 

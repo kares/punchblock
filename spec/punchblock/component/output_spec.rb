@@ -170,6 +170,26 @@ module Punchblock
           end
         end
 
+        context 'with a url reference' do
+          let(:uri){ URI('http://example.com/hello.ssml') }
+          subject do
+            Output.new render_document: { url: uri }
+          end
+
+          its(:render_documents) { should be == [Output::Document.new(url: uri)] }
+        end
+
+        context 'with multiple url references' do
+          let(:uri){ URI('http://example.com/hello.ssml') }
+          subject do
+            Output.new( render_document: {value: ssml_doc},
+                        render_documents: [{url: uri}, {url: uri}] )
+          end
+
+          its(:render_documents) { should be == [Output::Document.new(url: uri), Output::Document.new(url: uri)] }
+
+        end
+
         context "with a nil document" do
           it "removes all documents" do
             subject.render_document = nil
