@@ -1,5 +1,7 @@
 # [ifbyphone-develop](https://github.com/cloudvox/punchblock)
   * Feature: Support `:native_or_unimrcp` renderer when using `:unimrcp` recognizer for ASR
+  * Bugfix: Restore mainline defaults for UniMRCP settings
+  * Feature: Allow passing multiple ssml documents and audiofiles to UniMRCP (requires UniMRCP revision >= r2153)
 
 # [develop](https://github.com/adhearsion/punchblock)
 
