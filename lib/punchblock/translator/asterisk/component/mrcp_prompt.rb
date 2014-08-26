@@ -35,14 +35,30 @@ module Punchblock
             collect_docs.map(&:squish).join("^")
           end
 
+          AUDIO_CONTENT_TYPE = /^audio/
+          AUDIO_PREFIX = 'audio:'
+          AUDIO_EXT = /\.(wav|WAV)$/
+
           def collect_docs
             output_node.render_documents.map do |d|
               if d.content_type
-                d.value.to_doc.to_s
+                if d.content_type.match /^audio/
+                  format_audio d.url
+                else
+                  format_doc d.value
+                end
               else
                 d.url
               end
             end
+          end
+
+          def format_doc(value)
+            value.to_doc.to_s
+          end
+
+          def format_audio(url)
+            AUDIO_PREFIX + url.sub(AUDIO_EXT, '')
           end
 
           def unimrcp_app_options
