@@ -37,7 +37,7 @@ module Punchblock
 
           AUDIO_CONTENT_TYPE = /^audio/
           AUDIO_PREFIX = 'audio:'
-          AUDIO_EXT = /\.(wav|WAV)$/
+          FILE_EXT = /\.[^\.]*$/
 
           def collect_docs
             output_node.render_documents.map do |d|
@@ -58,7 +58,7 @@ module Punchblock
           end
 
           def format_audio(url)
-            AUDIO_PREFIX + url.sub(AUDIO_EXT, '')
+            AUDIO_PREFIX + url.sub(FILE_EXT, '')
           end
 
           def unimrcp_app_options
