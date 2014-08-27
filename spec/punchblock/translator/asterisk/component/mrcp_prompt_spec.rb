@@ -152,6 +152,17 @@ module Punchblock
               end
             end
 
+            context 'with audiofile document' do
+              let(:output_command_options) { { render_documents: [{url: '/filesystem/upload.wav', content_type: 'audio/wav'}, {url: '/filesystem/recording.ulaw', content_type: 'audio/ulaw'}] } }
+
+              it "should return a ref and execute SynthAndRecog" do
+                param = ['audio:/filesystem/upload^audio:/filesystem/recording', voice_grammar.to_doc.to_s].map { |o| "\"#{o.to_s.squish.gsub('"', '\"')}\"" }.push('uer=1&b=1').join(',')
+                mock_call.should_receive(:execute_agi_command).once.with('EXEC SynthAndRecog', param).and_return code: 200, result: 1
+                subject.execute
+                original_command.response(0.1).should be_a Ref
+              end
+            end
+
             context 'unset' do
               let(:output_command_options) { {} }
 
