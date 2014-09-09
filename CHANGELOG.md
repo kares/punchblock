@@ -2,6 +2,7 @@
   * Feature: Support `:native_or_unimrcp` renderer when using `:unimrcp` recognizer for ASR
   * Bugfix: Restore mainline defaults for UniMRCP settings
   * Feature: Allow passing multiple ssml documents and audiofiles to UniMRCP (requires UniMRCP revision >= r2153)
+  * Feature: Enable setting 'Dtmf-Term-Timeout' value for UniMRCP; necessary to exit sooner from successful Lumenvox recognition event
 
 # [develop](https://github.com/adhearsion/punchblock)
 
