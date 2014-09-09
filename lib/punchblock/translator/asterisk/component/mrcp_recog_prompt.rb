@@ -56,6 +56,7 @@ module Punchblock
               opts[:nit] = @initial_timeout if @initial_timeout > -1
               opts[:dit] = @inter_digit_timeout if @inter_digit_timeout > -1
               opts[:dttc] = input_node.terminator if input_node.terminator
+              opts[:dtt] = input_node.dtmf_term_timeout if input_node.dtmf_term_timeout
               opts[:spl] = input_node.language if input_node.language
               opts[:ct] = input_node.min_confidence if input_node.min_confidence
               opts[:sl] = input_node.sensitivity if input_node.sensitivity
