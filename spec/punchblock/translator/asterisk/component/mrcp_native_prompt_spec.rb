@@ -223,6 +223,17 @@ module Punchblock
                     end
                   end
 
+                 context 'with a 015 response code' do
+                    let(:recog_completion_cause) { '015' }
+
+                    it 'should send a nomatch complete event' do
+                      expected_complete_reason = Punchblock::Component::Input::Complete::NoMatch.new
+                      mock_call.should_receive(:execute_agi_command).and_return code: 200, result: 1
+                      subject.execute
+                      original_command.complete_event(0.1).reason.should == expected_complete_reason
+                    end
+                  end
+
                   context "when the RECOG_STATUS variable is set to 'ERROR'" do
                     let(:recog_status) { 'ERROR' }
 

@@ -13,3 +13,4 @@ vendor
 *.rbc
 tmp
 coverage
+tags

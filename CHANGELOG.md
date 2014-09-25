@@ -1,3 +1,14 @@
+# [ifbyphone-develop](https://github.com/cloudvox/punchblock)
+  * Bugfix: Register/lookup components by their full URI rather than component ID since the component ID may only be unique per call (cherry-pick from mainline)
+  * Bugfix: Hold back Virtus dependency to avoid API-breaking changes (cherry-pick from mainline)
+  * Feature: Support `:native_or_unimrcp` renderer when using `:unimrcp` recognizer for ASR
+  * Bugfix: Support response code `'015'` from MRCP Recog Prompts (new versions of Lumenvox (correctly) respond with this in some cases)
+  * Bugfix: Support passing a `'Recognition-Timeout'` flag to UniMRCP; necessary to handle shorter default settings in recognition engines like Lumenvox
+  * Bugfix: Restore mainline defaults for UniMRCP settings
+  * Feature: Allow passing multiple ssml documents and audiofiles to UniMRCP (requires UniMRCP revision >= r2153)
+  * Bugfix: Handle a corner case crash where a recognition request is interrupted directly after a successful recognition has completed
+  * Feature: Enable setting 'Dtmf-Term-Timeout' value for UniMRCP; necessary to exit sooner from successful Lumenvox recognition event
+
 # [develop](https://github.com/adhearsion/punchblock)
   * Feature: Support RubySpeech builtin grammars on Asterisk and FreeSWITCH
   * Bugfix: Reject commands against components which have finished on Asterisk, and garbage collect them

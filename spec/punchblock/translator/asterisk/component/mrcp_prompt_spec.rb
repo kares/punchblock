@@ -93,23 +93,15 @@ module Punchblock
           end
 
           context 'with an invalid recognizer' do
-            let(:input_command_opts) { { recognizer: 'foobar' } }
+            [:asterisk, :foobar].each do |recognizer|
+              context "with a recognizer #{recognizer.inspect}" do
+                let(:input_command_opts) { { recognizer: recognizer } }
 
-            it "should return an error and not execute any actions" do
-              subject.execute
-              error = ProtocolError.new.setup 'option error', 'The recognizer foobar is unsupported.'
-              original_command.response(0.1).should be == error
-            end
-          end
-
-          [:asterisk].each do |recognizer|
-            context "with a recognizer #{recognizer.inspect}" do
-              let(:input_command_opts) { { recognizer: recognizer } }
-
-              it "should return an error and not execute any actions" do
-                subject.execute
-                error = ProtocolError.new.setup 'option error', "The recognizer #{recognizer} is unsupported."
-                original_command.response(0.1).should be == error
+                it "should return an error and not execute any actions" do
+                  subject.execute
+                  error = ProtocolError.new.setup 'option error', "The recognizer #{recognizer} is unsupported."
+                  original_command.response(0.1).should be == error
+                end
               end
             end
           end
@@ -133,20 +125,33 @@ module Punchblock
             context 'with multiple inline documents' do
               let(:output_command_options) { { render_documents: [{value: ssml_doc}, {value: ssml_doc}] } }
 
-              it "should return an error and not execute any actions" do
+              it "should return a ref and execute SynthAndRecog" do
+                param = [[ssml_doc, ssml_doc].map{|d| d.to_doc.to_s.squish}.join('^'), voice_grammar.to_doc.to_s].map { |o| "\"#{o.to_s.squish.gsub('"', '\"')}\"" }.push('uer=1&b=1').join(',')
+                mock_call.should_receive(:execute_agi_command).once.with('EXEC SynthAndRecog', param).and_return code: 200, result: 1
                 subject.execute
-                error = ProtocolError.new.setup 'option error', 'Only one document is allowed.'
-                original_command.response(0.1).should be == error
+                original_command.response(0.1).should be_a Ref
               end
             end
 
             context 'with multiple documents by URI' do
               let(:output_command_options) { { render_documents: [{url: 'http://example.com/doc1.ssml'}, {url: 'http://example.com/doc2.ssml'}] } }
 
-              it "should return an error and not execute any actions" do
+              it "should return a ref and execute SynthAndRecog" do
+                param = ['http://example.com/doc1.ssml^http://example.com/doc2.ssml', voice_grammar.to_doc.to_s].map { |o| "\"#{o.to_s.squish.gsub('"', '\"')}\"" }.push('uer=1&b=1').join(',')
+                mock_call.should_receive(:execute_agi_command).once.with('EXEC SynthAndRecog', param).and_return code: 200, result: 1
                 subject.execute
-                error = ProtocolError.new.setup 'option error', 'Only one document is allowed.'
-                original_command.response(0.1).should be == error
+                original_command.response(0.1).should be_a Ref
+              end
+            end
+
+            context 'with audiofile document' do
+              let(:output_command_options) { { render_documents: [{url: '/filesystem/upload.wav', content_type: 'audio/wav'}, {url: '/filesystem/recording.ulaw', content_type: 'audio/ulaw'}] } }
+
+              it "should return a ref and execute SynthAndRecog" do
+                param = ['audio:/filesystem/upload^audio:/filesystem/recording', voice_grammar.to_doc.to_s].map { |o| "\"#{o.to_s.squish.gsub('"', '\"')}\"" }.push('uer=1&b=1').join(',')
+                mock_call.should_receive(:execute_agi_command).once.with('EXEC SynthAndRecog', param).and_return code: 200, result: 1
+                subject.execute
+                original_command.response(0.1).should be_a Ref
               end
             end
 
@@ -162,7 +167,7 @@ module Punchblock
           end
 
           describe 'Output#renderer' do
-            [nil, :unimrcp].each do |renderer|
+            [nil, :unimrcp, :native_or_unimrcp].each do |renderer|
               context renderer.to_s do
                 let(:output_command_opts) { { renderer: renderer } }
 
@@ -212,6 +217,18 @@ module Punchblock
                       mock_call.should_receive(:execute_agi_command).and_return code: 200, result: 1
                       subject.execute
                       original_command.complete_event(0.1).reason.should == expected_complete_reason
+                    end
+                  end
+
+                  context "when the RECOG_STATUS variable is set to 'INTERRUPTED' after a successful recognition" do
+                    let(:recog_status) { 'INTERRUPTED' }
+                    let(:recog_completion_cause) { '000' }
+
+                    it "should send an error complete event" do
+                      expected_complete_reason = Punchblock::Component::Input::Complete::NoMatch.new
+                      expect(mock_call).to receive(:execute_agi_command).and_return code: 200, result: 1
+                      subject.execute
+                      expect(original_command.complete_event(0.1).reason).to eq(expected_complete_reason)
                     end
                   end
 

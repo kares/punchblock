@@ -32,13 +32,13 @@ module Punchblock
               raise OptionError, "A #{opt} value is unsupported on Asterisk." if output_node.send opt
             end
 
+            raise OptionError, "A recognition-timeout value must be a positive integer."  if @recognition_timeout && @recognition_timeout < 1
             raise OptionError, "An initial-timeout value must be -1 or a positive integer." if @initial_timeout < -1
             raise OptionError, "An inter-digit-timeout value must be -1 or a positive integer." if @inter_digit_timeout < -1
           end
 
           def execute_app(app, *args)
             UniMRCPApp.new(app, *args, unimrcp_app_options).execute @call
-            raise UniMRCPError if @call.channel_var('RECOG_STATUS') == 'ERROR'
           end
 
           def unimrcp_app_options
@@ -46,6 +46,11 @@ module Punchblock
               opts[:nit] = @initial_timeout if @initial_timeout > -1
               opts[:dit] = @inter_digit_timeout if @inter_digit_timeout > -1
               opts[:dttc] = input_node.terminator if input_node.terminator
+              opts[:dtt] = input_node.dtmf_term_timeout if input_node.dtmf_term_timeout
+              opts[:spl] = input_node.language if input_node.language
+              opts[:ct] = input_node.min_confidence if input_node.min_confidence
+              opts[:sl] = input_node.sensitivity if input_node.sensitivity
+              opts[:t]  = input_node.recognition_timeout if input_node.recognition_timeout
               yield opts
             end
           end
@@ -82,14 +87,24 @@ module Punchblock
           end
 
           def complete
-            send_complete_event case @call.channel_var('RECOG_COMPLETION_CAUSE')
-            when '000'
-              nlsml = RubySpeech.parse URI.decode(@call.channel_var('RECOG_RESULT'))
-              Punchblock::Component::Input::Complete::Match.new nlsml: nlsml
-            when '001'
-              Punchblock::Component::Input::Complete::NoMatch.new
-            when '002'
-              Punchblock::Component::Input::Complete::NoInput.new
+            case @call.channel_var('RECOG_STATUS')
+            when 'INTERRUPTED'
+              send_complete_event Punchblock::Component::Input::Complete::NoMatch.new
+            when 'ERROR'
+              raise UniMRCPError
+            else
+              send_complete_event case @call.channel_var('RECOG_COMPLETION_CAUSE')
+              when '000'
+                nlsml = RubySpeech.parse URI.decode(@call.channel_var('RECOG_RESULT'))
+                Punchblock::Component::Input::Complete::Match.new nlsml: nlsml
+              when '001'
+                Punchblock::Component::Input::Complete::NoMatch.new
+              when '002'
+                Punchblock::Component::Input::Complete::NoInput.new
+              when '015'    
+                pb_logger.debug "Recieved a response code of 015! Call was #{@call.inspect}"   
+                Punchblock::Component::Input::Complete::NoMatch.new
+              end
             end
           end
         end
