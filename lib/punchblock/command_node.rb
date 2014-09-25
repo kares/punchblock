@@ -31,6 +31,9 @@ module Punchblock
       return if @response.set_yet?
       @response.resource = other
       execute!
+    rescue FutureResource::ResourceAlreadySetException
+      pb_logger.warn "Rescuing a FutureResource::ResourceAlreadySetException!"
+      pb_logger.warn "Here is some information about me: #{self.inspect}"      
     end
   end # CommandNode
 end # Punchblock
