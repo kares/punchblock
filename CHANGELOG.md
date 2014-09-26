@@ -3,6 +3,7 @@
   * Bugfix: Restore mainline defaults for UniMRCP settings
   * Feature: Allow passing multiple ssml documents and audiofiles to UniMRCP (requires UniMRCP revision >= r2153)
   * Feature: Enable setting 'Dtmf-Term-Timeout' value for UniMRCP; necessary to exit sooner from successful Lumenvox recognition event
+  * Feature: Enable setting 'Speech-Complete-Timeout' value for UniMRCP; necessary to allow additional input after an initial match has been recognized
 
 # [develop](https://github.com/adhearsion/punchblock)
 

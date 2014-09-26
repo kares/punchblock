@@ -43,7 +43,7 @@ module Punchblock
       # @return [Integer] Indicates the amount of time during input that recognition will occur before a timeout is triggered.
       attribute :recognition_timeout, Integer
 
-      # @return [Integer] Indicates the length of silence following speech prior to the recognizer attempting a match and returning a result.
+      # @return [Integer] Indicates the length of time additional input may be accepted following a match before returning the result.
       attribute :speech_complete_timeout, Integer 
 
       attribute :grammars, Array, default: []
