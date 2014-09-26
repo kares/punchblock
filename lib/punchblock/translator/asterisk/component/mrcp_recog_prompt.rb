@@ -61,6 +61,7 @@ module Punchblock
               opts[:ct] = input_node.min_confidence if input_node.min_confidence
               opts[:sl] = input_node.sensitivity if input_node.sensitivity
               opts[:t]  = input_node.recognition_timeout if @recognition_timeout > -1
+              opts[:sct] = input_node.speech_complete_timeout if input_node.speech_complete_timeout
               yield opts
             end
           end

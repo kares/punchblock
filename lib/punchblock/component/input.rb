@@ -43,6 +43,9 @@ module Punchblock
       # @return [Integer] Indicates the amount of time during input that recognition will occur before a timeout is triggered.
       attribute :recognition_timeout, Integer
 
+      # @return [Integer] Indicates the length of silence following speech prior to the recognizer attempting a match and returning a result.
+      attribute :speech_complete_timeout, Integer 
+
       attribute :grammars, Array, default: []
       def grammars=(others)
         super others.map { |other| Grammar.new(other) }
@@ -76,7 +79,8 @@ module Punchblock
           'initial-timeout' => initial_timeout,
           'inter-digit-timeout' => inter_digit_timeout,
           'dtmf-term-timeout' => dtmf_term_timeout,
-          'recognition-timeout' => recognition_timeout
+          'recognition-timeout' => recognition_timeout,
+          'speech-complete-timeout' => speech_complete_timeout
         }
       end
 
