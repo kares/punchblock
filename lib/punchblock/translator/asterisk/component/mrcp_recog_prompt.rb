@@ -45,7 +45,7 @@ module Punchblock
             raise OptionError, "An initial-timeout value must be -1 or a positive integer." if @initial_timeout < -1
             raise OptionError, "An inter-digit-timeout value must be -1 or a positive integer." if @inter_digit_timeout < -1
             raise OptionError, "A recognition-timeout value must be -1, 0, or a positive integer." if @recognition_timeout < -1
-            raise OptionError, "A speech-complete-timeout value must be a positive integer."  if @speech_complete_timeout && @speech_complete_timeout < 1
+            raise OptionError, "A speech-complete-timeout value must be a positive integer."  if @speech_complete_timeout && @speech_complete_timeout < 0
           end
 
           def execute_app(app, *args)
