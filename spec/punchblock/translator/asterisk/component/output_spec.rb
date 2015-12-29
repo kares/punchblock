@@ -1348,20 +1348,20 @@ module Punchblock
                     context "when multiple fallback documents are specified" do
                       let :fallback_doc1 do
                         RubySpeech::SSML.draw do
-                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 1' }}
+                          voice(name: 'Paul') { prosody(rate: 1.0) { string 'Fallback 1' } }
                         end
                       end
 
                       let :fallback_doc2 do
                         RubySpeech::SSML.draw do
-                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 2' }}
+                          voice(name: 'Paul') { prosody(rate: 1.0) { string 'Fallback 2' } }
                         end
                       end
 
                       let :fallback_doc do
                         RubySpeech::SSML.draw do
-                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 1' }}
-                          voice(name:'Paul'){ prosody(rate: 1.0){ 'Fallback 2' }}
+                          voice(name: 'Paul') { prosody(rate: 1.0) { string 'Fallback 1' } }
+                          voice(name: 'Paul') { prosody(rate: 1.0) { string 'Fallback 2' } }
                         end
                       end
 
@@ -1388,7 +1388,8 @@ module Punchblock
                         expect_mrcpsynth fallback_doc2
                         expect_playback audio_filename3
                         subject.execute
-                        original_command.complete_event(0.1).reason.should be_a Punchblock::Component::Output::Complete::Finish
+                        complete_reason = original_command.complete_event(0.1).reason
+                        expect(complete_reason).to be_a Punchblock::Component::Output::Complete::Finish
                       end
                     end
 
