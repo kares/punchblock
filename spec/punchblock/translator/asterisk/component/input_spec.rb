@@ -101,6 +101,7 @@ module Punchblock
                 end
 
                 it "should not leave the recognizer running" do
+                  sleep 0.1 # magic due JRuby not to be too eager
                   expect(Celluloid::Actor.all.map { |a| a.class }).not_to include(Punchblock::Translator::DTMFRecognizer)
                 end
               end
