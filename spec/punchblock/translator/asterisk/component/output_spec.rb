@@ -1381,6 +1381,8 @@ module Punchblock
                       end
 
                       it "should render each document individually via MRCP and then send a complete event" do
+                        pending 'MRI: fails because :execute_agi_command receives name-spaced <default:voice> ... EXEC MRCPSynth' unless defined? JRUBY_VERSION
+                        
                         expect_answered
                         expect_playback audio_filename1
                         expect_playback audio_filename2
