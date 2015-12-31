@@ -1,14 +1,11 @@
 language: ruby
 rvm:
   - 1.9.3
-  - 2.0.0
-  - 2.1.0
-  - jruby
-  - rbx-2.1.1
-  - ruby-head
+  - 2.2.3
+  - jruby-1.7.4
+  - jruby-1.7.23
 matrix:
   allow_failures:
-    - rvm: ruby-head
-    - rvm: rbx-2.1.1
-notifications:
-  irc: "irc.freenode.org#adhearsion"
+    - rvm: jruby-1.7.4 # tends to dead-lock quite often
+#notifications:
+#  irc: "irc.freenode.org#adhearsion"
